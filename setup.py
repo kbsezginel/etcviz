@@ -13,7 +13,7 @@ setup(
     url='https://github.com/kbsezginel/etcviz',
     include_package_data=True,
     packages=find_packages(),
-    install_requires=['pygame'],
+    install_requires=['pygame', 'imageio'],
     entry_points={
         'console_scripts': ['etcviz=etcviz.cli:main']
     }
