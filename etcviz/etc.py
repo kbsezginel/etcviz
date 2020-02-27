@@ -3,6 +3,7 @@ ETC object.
 """
 import os
 import math
+import pygame
 import random
 
 
@@ -91,3 +92,15 @@ class ETC:
 
         self.bg_color = color
         return color
+
+    def update_knobs(self, key, knobs):
+        """Update knobs but pressing a number between 1 - 4 and up/down keys together"""
+        for knob_id in range(1, 6):
+            if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_UP]:
+                knobs[knob_id] += self.knob_step
+                knobs[knob_id] = min(knobs[knob_id], 1.0)
+                setattr(self, f"knob{knob_id}", knobs[knob_id])
+            if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_DOWN]:
+                knobs[knob_id] -= self.knob_step
+                knobs[knob_id] = max(knobs[knob_id], 0.0)
+                setattr(self, f"knob{knob_id}", knobs[knob_id])
