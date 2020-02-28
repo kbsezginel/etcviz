@@ -46,7 +46,8 @@ def main():
     args = parser.parse_args()
 
     # Import the ETC mode script
-    etc_mode = importlib.import_module(args.mode.split('.py')[0])
+    mode_name = args.mode.split('.py')[0]
+    etc_mode = importlib.import_module(mode_name)
     knobs = {i: k for i, k in enumerate(args.knobs, start=1)}
     img_dir = 'imageseq'
 
@@ -88,6 +89,8 @@ def main():
             etc.audio_trig = True
         if key[pygame.K_z]:
             etc.audio_trig = False
+        if key[pygame.K_s]:
+            pygame.image.save(screen, f"{mode_name}-screenshot.jpg")
         for event in pygame.event.get():
             if event.type == pygame.QUIT: # if you try to quit, let's leave this loop
                 running = False
