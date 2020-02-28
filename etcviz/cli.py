@@ -53,6 +53,7 @@ def main():
 
     running = True
     recording = False
+    counter = 0
 
     if args.record or args.gif:
         recording = True
@@ -91,6 +92,13 @@ def main():
             etc.audio_trig = False
         if key[pygame.K_s]:
             pygame.image.save(screen, f"{mode_name}-screenshot.jpg")
+        if key[pygame.K_r]:
+            pygame.image.save(screen, os.path.join(img_dir, '%05d.jpg' % counter))
+            counter += 1
+        elif counter != 0:
+            images_to_gif(img_dir, f"{mode_name}-screencast.gif")
+            counter = 0
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT: # if you try to quit, let's leave this loop
                 running = False
