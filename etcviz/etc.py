@@ -5,10 +5,12 @@ import os
 import math
 import pygame
 import random
+from .mode import Mode
+from .tools import read_csv
 
 
 class ETC:
-    def __init__(self):
+    def __init__(self, scenes=None):
         """
         Initialize a ETC object.
         """
@@ -23,6 +25,8 @@ class ETC:
         self.audio_trig = False
         self.midi_note_new = False
         # self.mode_root = os.path.dirname(etc_mode.__file__)
+        if scenes is not None:
+            self.read_scenes(scenes)
 
     def color_picker(self):
         """
@@ -104,3 +108,12 @@ class ETC:
                 knobs[knob_id] -= self.knob_step
                 knobs[knob_id] = max(knobs[knob_id], 0.0)
                 setattr(self, f"knob{knob_id}", knobs[knob_id])
+
+    def read_scenes(self, scenes_csv):
+        """Read ETC Scenes.csv file modes"""
+        scenes = read_csv(scenes_csv)
+        print(f'Reading scenes file: {scenes_csv}')
+        self.scenes = []
+        for idx, scene in enumerate(scenes):
+            mode = Mode(name=scene[0], knobs=scene[1:6])
+            self.scenes.append(mode)

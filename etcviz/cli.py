@@ -41,6 +41,8 @@ def main():
                         help="ETC knob settings (ex: 0.5 0.5 0.5 0.2 0.5)")
     parser.add_argument('-g', '--gif', type=str,
                         help="Save image sequence as gif file")
+    parser.add_argument('-rs', '--scenes', type=str,
+                        help="Read ETC Scenes.csv file")
     args = parser.parse_args()
 
     # Import the ETC mode script
@@ -65,7 +67,7 @@ def main():
             raise Exception(f"Image directory {img_dir} already exists, quitting!")
         counter = 0
 
-    etc = ETC()
+    etc = ETC(scenes=args.scenes)
 
     # initialize to ETC's resolution
     screenWidth, screenHeight = 1280, 720
