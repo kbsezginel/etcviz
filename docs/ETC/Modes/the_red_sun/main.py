@@ -7,6 +7,7 @@ When triggered the sun position changes.
 3) Tree alpha
 4) Noise and sun color
 """
+import os
 import pygame
 import random
 
@@ -19,10 +20,12 @@ SUN = {'x': 750, 'x_min': 400, 'x_range': 500,
        'color': (161, 19, 19, 100)}
 
 trigger = False
-global tree_img
+tree_img = None
 
 def setup(screen, etc):
-    filepath = etc.mode_root + '../images/tree1.png'
+    global tree_img
+    # filepath = os.path.join(etc.mode_root, '..', 'images', 'tree1.png')
+    filepath = os.path.join(etc.mode_root, 'tree1.png')
     tree_img = pygame.image.load(filepath)
 
 def draw(screen, etc):
