@@ -5,12 +5,14 @@ import os
 import math
 import pygame
 import random
+import shutil
+import importlib
 from .mode import Mode
 from .tools import read_csv
 
 
 class ETC:
-    def __init__(self, scenes=None):
+    def __init__(self, modes, scenes=None):
         """
         Initialize a ETC object.
         """
@@ -24,9 +26,75 @@ class ETC:
         self.bg_color = (0, 0, 0)
         self.audio_trig = False
         self.midi_note_new = False
-        # self.mode_root = os.path.dirname(etc_mode.__file__)
+        self.resolution = (1280, 720)
+        self.screen = pygame.display.set_mode(self.resolution)
+        self.wd = "etctmp"
+        self.read_modes(modes)
+        self.init_workdir()
+        self.mode_index = 0
+        self.setup_mode()
         if scenes is not None:
             self.read_scenes(scenes)
+
+
+    def init_workdir(self):
+        """
+        Initialize a temporary work directory for ETC to use importlib.
+        """
+        # Create workdir if not exists (delete if exists)
+        if os.path.exists(self.wd):
+            shutil.rmtree(self.wd)
+        os.mkdir(self.wd)
+        # Copy all mode files
+        for mode in self.modes:
+            mode.root = os.path.join(self.wd, mode.name)
+            mode.libname = f"{self.wd}.{mode.name}.main"
+            shutil.copytree(mode.dir, mode.root)
+
+    def read_modes(self, mode):
+        """
+        Read mode(s) from a given directory.
+        Initially checks if there is a 'main.py' file in the given directory.
+        If there is only loads that mode, if not checks each directory
+        in given directory and collects the ones with 'main.py' files.
+        """
+        self.modes = []
+        modes_list = os.listdir(mode)
+        if "main.py" in modes_list:
+            self.modes = [Mode(mode)]
+        if self.modes == []:
+            for m in modes_list:
+                mdir = os.path.join(mode, m)
+                if os.path.isdir(mdir):
+                    if "main.py" in os.listdir(mdir):
+                        self.modes.append(Mode(mdir))
+
+    def setup_mode(self):
+        """
+        Load mode and setup display.
+        """
+        self.mode = importlib.import_module(self.modes[self.mode_index].libname)
+        self.mode_root = self.modes[self.mode_index].root
+        self.mode.setup(self.screen, self)
+        print(f"Load mode {self.mode_index} / {len(self.modes)} : {self.modes[self.mode_index].name}")
+
+    def load_next_mode(self):
+        """
+        Load next mode in the list.
+        """
+        self.mode_index += 1
+        if self.mode_index >= len(self.modes):
+            self.mode_index = 0
+        self.setup_mode()
+
+    def load_previous_mode(self):
+        """
+        Load previous mode in the list.
+        """
+        self.mode_index -= 1
+        if self.mode_index <= 0:
+            self.mode_index = len(self.modes) - 1
+        self.setup_mode()
 
     def color_picker(self):
         """
@@ -98,7 +166,9 @@ class ETC:
         return color
 
     def update_knobs(self, key, knobs):
-        """Update knobs but pressing a number between 1 - 4 and up/down keys together"""
+        """
+        Update knobs but pressing a number between 1 - 4 and up/down keys together
+        """
         for knob_id in range(1, 6):
             if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_UP]:
                 knobs[knob_id] += self.knob_step
@@ -110,7 +180,9 @@ class ETC:
                 setattr(self, f"knob{knob_id}", knobs[knob_id])
 
     def read_scenes(self, scenes_csv):
-        """Read ETC Scenes.csv file modes"""
+        """
+        Read ETC Scenes.csv file modes
+        """
         scenes = read_csv(scenes_csv)
         print(f'Reading scenes file: {scenes_csv}')
         self.scenes = []

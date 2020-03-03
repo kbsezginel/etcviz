@@ -31,7 +31,7 @@ def main():
 
     # Positional arguments
     parser.add_argument('mode', type=str,
-                        help="Filename or directory of the ETC mode")
+                        help="Directory of the ETC mode(s)")
 
     # Optional arguments
     parser.add_argument('-r', '--record', type=int,
@@ -45,9 +45,11 @@ def main():
                         help="Read ETC Scenes.csv file")
     args = parser.parse_args()
 
-    # Import the ETC mode script
-    mode_name = args.mode.split('.py')[0]
-    etc_mode = importlib.import_module(mode_name)
+    pygame.init()
+    pygame.key.set_repeat(0)
+    # Initialize ETC
+    etc = ETC(scenes=args.scenes, modes=args.mode)
+
     knobs = {i: k for i, k in enumerate(args.knobs, start=1)}
     img_dir = 'imageseq'
 
@@ -69,20 +71,18 @@ def main():
             raise Exception(f"Image directory {img_dir} already exists, quitting!")
         counter = 0
 
-    etc = ETC(scenes=args.scenes)
-
-    # initialize to ETC's resolution
-    screenWidth, screenHeight = 1280, 720
-    pygame.init()
-    screen = pygame.display.set_mode((screenWidth, screenHeight))
-
-    etc_mode.setup(screen, etc)
-
+    # MAIN LOOP ----------------------------------------------------------------
     while running:
-        screen.fill((0, 0, 0, 255))
-        etc_mode.draw(screen, etc)
-
         key = pygame.key.get_pressed()
+
+        etc.screen.fill((0, 0, 0, 255))
+        try:
+            etc.mode.draw(etc.screen, etc)
+        except Exception as e:
+            print(e)
+            print(f"Skipping mode {etc.mode_index}: {etc.modes[etc.mode_index].name}")
+            etc.load_next_mode()
+
         etc.update_knobs(key, knobs)
         if key[pygame.K_q]:
             exit()
@@ -91,9 +91,9 @@ def main():
         if key[pygame.K_z]:
             etc.audio_trig = False
         if key[pygame.K_s]:
-            pygame.image.save(screen, f"{mode_name}-screenshot.jpg")
+            pygame.image.save(etc.screen, f"{mode_name}-screenshot.jpg")
         if key[pygame.K_r]:
-            pygame.image.save(screen, os.path.join(img_dir, '%05d.jpg' % counter))
+            pygame.image.save(etc.screen, os.path.join(img_dir, '%05d.jpg' % counter))
             counter += 1
         elif counter != 0:
             images_to_gif(img_dir, f"{mode_name}-screencast.gif")
@@ -102,10 +102,15 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT: # if you try to quit, let's leave this loop
                 running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    etc.load_next_mode()
+                if event.key == pygame.K_LEFT:
+                    etc.load_previous_mode()
         pygame.display.flip()
 
         if recording and counter < n_frames:
-            pygame.image.save(screen, "imageseq/%05d.jpg" % counter)
+            pygame.image.save(etc.screen, os.path.join(img_dir, '%05d.jpg' % counter))
             counter += 1
         elif recording and counter == n_frames:
             if args.gif:
