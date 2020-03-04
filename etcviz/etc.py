@@ -3,16 +3,19 @@ ETC object.
 """
 import os
 import math
-import pygame
 import random
 import shutil
 import importlib
+from copy import deepcopy
+
+import pygame
+
 from .mode import Mode
-from .tools import read_csv
+from .tools import read_csv, write_csv
 
 
 class ETC:
-    def __init__(self, mode_dir, scenes=None):
+    def __init__(self, mode_dir, scenes=None, resolution=(1280, 720)):
         """
         Initialize a ETC object.
         """
@@ -26,9 +29,10 @@ class ETC:
         self.bg_color = (0, 0, 0)
         self.audio_trig = False
         self.midi_note_new = False
-        self.resolution = (1280, 720)
+        self.resolution = resolution
         self.screen = pygame.display.set_mode(self.resolution)
         self.wd = "etctmp"
+        self.saved_scenes = []
         if scenes is not None:
             self.read_scenes(scenes, mode_dir)
         else:
@@ -99,6 +103,44 @@ class ETC:
             self.mode_index = len(self.modes) - 1
         self.setup_mode()
 
+    def save_mode(self):
+        """
+        Save current mode with knob settings.
+        """
+        mode = deepcopy(self.modes[self.mode_index])
+        mode.knobs = {i: getattr(self, f"knob{i}") for i in range(1, 6)}
+        self.saved_scenes.append(mode)
+        print(f"Saved mode {mode.name} | {len(self.saved_scenes)}")
+
+    def update_knobs(self, knobs):
+        """
+        Update knobs from a dictionary.
+        """
+        for knob_id in range(1, 6):
+            setattr(self, f"knob{knob_id}", knobs[knob_id])
+
+    def read_scenes(self, filename, mode_dir):
+        """
+        Read ETC Scenes.csv file modes
+        """
+        scenes = read_csv(filename)
+        print(f'Reading scenes file: {filename}')
+        self.modes = []
+        for idx, scene in enumerate(scenes):
+            knobs = {i: float(scene[i]) for i in range(1, 6)}
+            mode = Mode(os.path.join(mode_dir, scene[0]), knobs=knobs)
+            self.modes.append(mode)
+
+    def write_scenes(self, filename):
+        """
+        Write saved scenes to Scenes.csv file
+        """
+        rows = []
+        for m in self.saved_scenes:
+            rows.append([m.name] + [m.knobs[i] for i in range(1, 6)] + [True])
+        write_csv(filename, rows)
+        print(f"Saved scenes to {filename}")
+
     def color_picker(self):
         """
         Original color_picker function from ETC. See link below:
@@ -167,22 +209,3 @@ class ETC:
 
         self.bg_color = color
         return color
-
-    def update_knobs(self, knobs):
-        """
-        Update knobs from a dictionary.
-        """
-        for knob_id in range(1, 6):
-            setattr(self, f"knob{knob_id}", knobs[knob_id])
-
-    def read_scenes(self, scenes_csv, mode_dir):
-        """
-        Read ETC Scenes.csv file modes
-        """
-        scenes = read_csv(scenes_csv)
-        print(f'Reading scenes file: {scenes_csv}')
-        self.modes = []
-        for idx, scene in enumerate(scenes):
-            knobs = {i + 1: scene[i] for i in range(5)}
-            mode = Mode(os.path.join(mode_dir, scene[0]), knobs=knobs)
-            self.modes.append(mode)

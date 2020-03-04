@@ -43,12 +43,15 @@ def main():
                         help="Save image sequence as gif file")
     parser.add_argument('-rs', '--scenes', type=str,
                         help="Read ETC Scenes.csv file")
+    parser.add_argument('--scale', type=float, default=1.0,
+                        help="Scale screen resolution")
     args = parser.parse_args()
 
     pygame.init()
     pygame.key.set_repeat(0)
     # Initialize ETC
-    etc = ETC(args.mode, scenes=args.scenes)
+    resolution = (int(1280 * args.scale), int(720 * args.scale))
+    etc = ETC(args.mode, scenes=args.scenes, resolution=resolution)
 
     knobs = {i: k for i, k in enumerate(args.knobs, start=1)}
     img_dir = 'imageseq'
@@ -116,6 +119,10 @@ def main():
                     etc.load_next_mode()
                 if event.key == pygame.K_LEFT:
                     etc.load_previous_mode()
+                if event.key == pygame.K_a:
+                    etc.save_mode()
+                if event.key == pygame.K_w:
+                    etc.write_scenes('Scenes.csv')
         pygame.display.flip()
 
         if recording and counter < n_frames:

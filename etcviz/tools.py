@@ -23,7 +23,7 @@ def images_to_gif(img_dir, gif_file):
     None
 
     """
-    filenames = [os.path.join(img_dir, f) for f in os.listdir(img_dir)]
+    filenames = [os.path.join(img_dir, f) for f in os.listdir(img_dir) if os.path.splitext(f)[1] == '.jpg']
     images = []
     for filename in filenames:
         images.append(imageio.imread(filename))
@@ -37,3 +37,11 @@ def read_csv(filename):
         for row in csvreader:
             rows.append(row)
     return rows
+
+
+def write_csv(filename, rows):
+    with open(filename, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',',
+                               quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for row in rows:
+            csvwriter.writerow(row)
