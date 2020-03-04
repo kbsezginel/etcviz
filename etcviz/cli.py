@@ -48,7 +48,7 @@ def main():
     pygame.init()
     pygame.key.set_repeat(0)
     # Initialize ETC
-    etc = ETC(scenes=args.scenes, modes=args.mode)
+    etc = ETC(args.mode, scenes=args.scenes)
 
     knobs = {i: k for i, k in enumerate(args.knobs, start=1)}
     img_dir = 'imageseq'
@@ -83,7 +83,16 @@ def main():
             print(f"Skipping mode {etc.mode_index}: {etc.modes[etc.mode_index].name}")
             etc.load_next_mode()
 
-        etc.update_knobs(key, knobs)
+        # Update knobs
+        for knob_id in range(1, 6):
+            if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_UP]:
+                knobs[knob_id] += etc.knob_step
+                knobs[knob_id] = min(knobs[knob_id], 1.0)
+            if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_DOWN]:
+                knobs[knob_id] -= etc.knob_step
+                knobs[knob_id] = max(knobs[knob_id], 0.0)
+        etc.update_knobs(knobs)
+
         if key[pygame.K_q]:
             exit()
         if key[pygame.K_SPACE]:

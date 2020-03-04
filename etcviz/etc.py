@@ -12,7 +12,7 @@ from .tools import read_csv
 
 
 class ETC:
-    def __init__(self, modes, scenes=None):
+    def __init__(self, mode_dir, scenes=None):
         """
         Initialize a ETC object.
         """
@@ -29,13 +29,13 @@ class ETC:
         self.resolution = (1280, 720)
         self.screen = pygame.display.set_mode(self.resolution)
         self.wd = "etctmp"
-        self.read_modes(modes)
+        if scenes is not None:
+            self.read_scenes(scenes, mode_dir)
+        else:
+            self.read_modes(mode_dir)
         self.init_workdir()
         self.mode_index = 0
         self.setup_mode()
-        if scenes is not None:
-            self.read_scenes(scenes)
-
 
     def init_workdir(self):
         """
@@ -49,7 +49,8 @@ class ETC:
         for mode in self.modes:
             mode.root = os.path.join(self.wd, mode.name)
             mode.libname = f"{self.wd}.{mode.name}.main"
-            shutil.copytree(mode.dir, mode.root)
+            if not os.path.exists(mode.root):
+                shutil.copytree(mode.dir, mode.root)
 
     def read_modes(self, mode):
         """
@@ -76,7 +77,9 @@ class ETC:
         self.mode = importlib.import_module(self.modes[self.mode_index].libname)
         self.mode_root = self.modes[self.mode_index].root
         self.mode.setup(self.screen, self)
-        print(f"Load mode {self.mode_index} / {len(self.modes)} : {self.modes[self.mode_index].name}")
+        self.update_knobs(self.modes[self.mode_index].knobs)
+        print(f"Load mode {self.mode_index + 1} / {len(self.modes)} : {self.modes[self.mode_index].name}")
+        print(f"Knobs: {self.modes[self.mode_index].knobs}")
 
     def load_next_mode(self):
         """
@@ -165,27 +168,21 @@ class ETC:
         self.bg_color = color
         return color
 
-    def update_knobs(self, key, knobs):
+    def update_knobs(self, knobs):
         """
-        Update knobs but pressing a number between 1 - 4 and up/down keys together
+        Update knobs from a dictionary.
         """
         for knob_id in range(1, 6):
-            if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_UP]:
-                knobs[knob_id] += self.knob_step
-                knobs[knob_id] = min(knobs[knob_id], 1.0)
-                setattr(self, f"knob{knob_id}", knobs[knob_id])
-            if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_DOWN]:
-                knobs[knob_id] -= self.knob_step
-                knobs[knob_id] = max(knobs[knob_id], 0.0)
-                setattr(self, f"knob{knob_id}", knobs[knob_id])
+            setattr(self, f"knob{knob_id}", knobs[knob_id])
 
-    def read_scenes(self, scenes_csv):
+    def read_scenes(self, scenes_csv, mode_dir):
         """
         Read ETC Scenes.csv file modes
         """
         scenes = read_csv(scenes_csv)
         print(f'Reading scenes file: {scenes_csv}')
-        self.scenes = []
+        self.modes = []
         for idx, scene in enumerate(scenes):
-            mode = Mode(name=scene[0], knobs=scene[1:6])
-            self.scenes.append(mode)
+            knobs = {i + 1: scene[i] for i in range(5)}
+            mode = Mode(os.path.join(mode_dir, scene[0]), knobs=knobs)
+            self.modes.append(mode)

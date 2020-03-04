@@ -4,7 +4,7 @@ ETC Mode object.
 import os
 
 
-default_knobs = [0.5, 0.5, 0.5, 0.5, 0.5]
+default_knobs = {1: 0.5, 2: 0.5, 3: 0.5, 4: 0.5, 5: 0.5}
 
 
 class Mode:
@@ -16,8 +16,4 @@ class Mode:
         dir_name = os.path.split(self.dir)[1]
         self.name = dir_name.replace(" ", "").replace("-", "_")
         self.libname = f"{self.name}.main"
-        self.knob1 = knobs[0]
-        self.knob2 = knobs[1]
-        self.knob3 = knobs[2]
-        self.knob4 = knobs[3]
-        self.knob5 = knobs[4]
+        self.knobs = knobs
