@@ -86,7 +86,9 @@ def main():
             print(f"Skipping mode {etc.mode_index}: {etc.modes[etc.mode_index].name}")
             etc.load_next_mode()
 
-        etc.render_help_message()
+        etc.display_help()
+        etc.display_levels()
+        etc.audio_stream()
 
         # Update knobs
         for knob_id in range(1, 6):
@@ -98,6 +100,12 @@ def main():
                 knobs[knob_id] = max(knobs[knob_id], 0.0)
         etc.update_knobs(knobs)
 
+        if key[pygame.K_0] and key[pygame.K_UP]:
+            etc.audio_level += 0.01
+            etc.audio_level = min(etc.audio_level, 1.0)
+        if key[pygame.K_0] and key[pygame.K_DOWN]:
+            etc.audio_level -= 0.01
+            etc.audio_level = max(etc.audio_level, 0.0)
         if key[pygame.K_q]:
             exit()
         if key[pygame.K_s]:
@@ -122,9 +130,11 @@ def main():
                 if event.key == pygame.K_w:
                     etc.write_scenes('Scenes.csv')
                 if event.key == pygame.K_h:
-                    etc.toggle_help_message()
+                    etc.toggle("help")
+                if event.key == pygame.K_l:
+                    etc.toggle("levels")
                 if event.key == pygame.K_SPACE:
-                    etc.toggle_audio_trig()
+                    etc.toggle("audio_trig")
         pygame.display.flip()
 
         if recording and counter < n_frames:

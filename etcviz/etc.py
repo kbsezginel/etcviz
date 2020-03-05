@@ -28,10 +28,12 @@ class ETC:
         self.audio_in = [random.randint(-32768, 32767) for i in range(100)]
         self.bg_color = (0, 0, 0)
         self.audio_trig = False
+        self.audio_level = 0.5
         self.midi_note_new = False
         self.resolution = resolution
         self.screen = pygame.display.set_mode(self.resolution)
-        self.display_help_message = True
+        self.help = True
+        self.levels = True
         self.wd = "etctmp"
         self.saved_scenes = []
         if scenes is not None:
@@ -142,9 +144,26 @@ class ETC:
         write_csv(filename, rows)
         print(f"Saved scenes to {filename}")
 
-    def render_help_message(self):
+    def display_levels(self):
         """
-        Render help message for usage instructions
+        Display knob values and audio level
+        """
+        if self.levels:
+            xpos, ypos = 10, 300
+            text_color = (200, 200, 200)
+            font_name = pygame.font.match_font('couriernew')
+            title_font = pygame.font.Font(font_name, 24)
+            title_text = title_font.render("Levels", True, text_color)
+            self.screen.blit(title_text, (xpos, ypos))
+            font = pygame.font.Font(font_name, 20)
+            levels = ["audio_level", "knob1", "knob2", "knob3", "knob4", "knob5"]
+            for idx, l in enumerate(levels, start=1):
+                text = font.render(f"{l}: {round(getattr(self, l), 2)}", True, text_color)
+                self.screen.blit(text, (xpos, ypos + 5 + idx * 20))
+
+    def display_help(self):
+        """
+        Display help message for usage instructions
         """
         text_color = (200, 200, 200)
         xpos, ypos = 10, 10
@@ -154,8 +173,10 @@ class ETC:
                         "a: save scene",
                         "w: write saved scenes",
                         "left/right arrow: switch mode",
-                        "1 - 5 + up/down arrow: change knob 1 - 5"]
-        if self.display_help_message:
+                        "1 - 5 + up/down arrow: change knob 1 - 5",
+                        "h: display usage info",
+                        "l: display level info"]
+        if self.help:
             title_font = pygame.font.Font(font_name, 24)
             title_text = title_font.render("Usage", True, text_color)
             self.screen.blit(title_text, (xpos, ypos))
@@ -164,23 +185,22 @@ class ETC:
                 text = font.render(i, True, text_color)
                 self.screen.blit(text, (xpos, ypos + 5 + idx * 20))
 
-    def toggle_help_message(self):
+    def toggle(self, attr):
         """
-        Toggle display help message
+        Toggle attribute
         """
-        if self.display_help_message:
-            self.display_help_message = False
+        if getattr(self, attr):
+            setattr(self, attr, False)
         else:
-            self.display_help_message = True
+            setattr(self, attr, True)
 
-    def toggle_audio_trig(self):
+    def audio_stream(self):
         """
-        Toggle audio input
+        Emulate audio input
         """
+        audio_level = (int(-32768 * self.audio_level), int(32767 * self.audio_level))
         if self.audio_trig:
-            self.audio_trig = False
-        else:
-            self.audio_trig = True
+            self.audio_in = [random.randint(audio_level[0], audio_level[1]) for i in range(100)]
 
     def color_picker(self):
         """
