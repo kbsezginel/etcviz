@@ -86,6 +86,8 @@ def main():
             print(f"Skipping mode {etc.mode_index}: {etc.modes[etc.mode_index].name}")
             etc.load_next_mode()
 
+        etc.render_help_message()
+
         # Update knobs
         for knob_id in range(1, 6):
             if key[getattr(pygame, f"K_{knob_id}")] and key[pygame.K_UP]:
@@ -98,10 +100,6 @@ def main():
 
         if key[pygame.K_q]:
             exit()
-        if key[pygame.K_SPACE]:
-            etc.audio_trig = True
-        if key[pygame.K_z]:
-            etc.audio_trig = False
         if key[pygame.K_s]:
             pygame.image.save(etc.screen, f"{mode_name}-screenshot.jpg")
         if key[pygame.K_r]:
@@ -123,6 +121,10 @@ def main():
                     etc.save_mode()
                 if event.key == pygame.K_w:
                     etc.write_scenes('Scenes.csv')
+                if event.key == pygame.K_h:
+                    etc.toggle_help_message()
+                if event.key == pygame.K_SPACE:
+                    etc.toggle_audio_trig()
         pygame.display.flip()
 
         if recording and counter < n_frames:

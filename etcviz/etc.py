@@ -31,6 +31,7 @@ class ETC:
         self.midi_note_new = False
         self.resolution = resolution
         self.screen = pygame.display.set_mode(self.resolution)
+        self.display_help_message = True
         self.wd = "etctmp"
         self.saved_scenes = []
         if scenes is not None:
@@ -140,6 +141,46 @@ class ETC:
             rows.append([m.name] + [m.knobs[i] for i in range(1, 6)] + [True])
         write_csv(filename, rows)
         print(f"Saved scenes to {filename}")
+
+    def render_help_message(self):
+        """
+        Render help message for usage instructions
+        """
+        text_color = (200, 200, 200)
+        xpos, ypos = 10, 10
+        font_name = pygame.font.match_font('couriernew')
+        instructions = ["s: save screenshot",
+                        "r: record gif (press + hold)",
+                        "a: save scene",
+                        "w: write saved scenes",
+                        "left/right arrow: switch mode",
+                        "1 - 5 + up/down arrow: change knob 1 - 5"]
+        if self.display_help_message:
+            title_font = pygame.font.Font(font_name, 24)
+            title_text = title_font.render("Usage", True, text_color)
+            self.screen.blit(title_text, (xpos, ypos))
+            font = pygame.font.Font(font_name, 20)
+            for idx, i in enumerate(instructions, start=1):
+                text = font.render(i, True, text_color)
+                self.screen.blit(text, (xpos, ypos + 5 + idx * 20))
+
+    def toggle_help_message(self):
+        """
+        Toggle display help message
+        """
+        if self.display_help_message:
+            self.display_help_message = False
+        else:
+            self.display_help_message = True
+
+    def toggle_audio_trig(self):
+        """
+        Toggle audio input
+        """
+        if self.audio_trig:
+            self.audio_trig = False
+        else:
+            self.audio_trig = True
 
     def color_picker(self):
         """
