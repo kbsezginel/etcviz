@@ -55,7 +55,7 @@ You can emulate knob value changes by pressing a number between 1 - 5 and pressi
 As you develop your mode and play around with different knob settings you might want to save the mode with current settings. If you press `a` key while display is on, this will save the current settings internally (almost like the *Scene Save* button on ETC). You can keep adding more modes this way. Once you want to save these to a file press `w` key. This will write all saved mode settings to `Scenes.csv` file in the current directory.
 
 > #### `Scenes.csv`
-This file can be found in `ETC/Scenes/Scenes.csv` and it is used as to store settings for saved scenes/modes. You can navigate between different saved scenes using the  You can create your own `Scenes.csv` file using `etcviz` as described above.
+> This file can be found in `ETC/Scenes/Scenes.csv` and it is used as to store settings for saved scenes/modes. You can navigate between different saved scenes using the  You can create your own `Scenes.csv` file using `etcviz` as described above.
 
 ### Visualizing scenes
 You can read `Scenes.csv` file and visualize them by proving the `Modes` directory and scenes file:

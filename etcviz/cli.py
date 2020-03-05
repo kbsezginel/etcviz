@@ -20,7 +20,7 @@ def main():
     ███████╗   ██║   ╚██████╗  ║  ╚╝ ╩╚═╝ ║
     ╚══════╝   ╚═╝    ╚═════╝  ╚══════════╝
     Critter & Guitari ETC Video Synthesizer
-    Mode Development Tools
+    Development and Visualization Tools
     =======================================
         """,
         epilog="""
