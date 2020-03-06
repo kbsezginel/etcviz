@@ -54,7 +54,6 @@ def main():
     etc = ETC(args.mode, scenes=args.scenes, resolution=resolution)
 
     knobs = {i: k for i, k in enumerate(args.knobs, start=1)}
-    img_dir = 'imageseq'
 
     running = True
     recording = False
@@ -66,13 +65,6 @@ def main():
         n_frames = 30
     else:
         n_frames = args.record
-
-    if recording:
-        if not os.path.exists(img_dir):
-            os.makedirs(img_dir)
-        else:
-            raise Exception(f"Image directory {img_dir} already exists, quitting!")
-        counter = 0
 
     # MAIN LOOP ----------------------------------------------------------------
     while running:
@@ -106,15 +98,12 @@ def main():
         if key[pygame.K_0] and key[pygame.K_DOWN]:
             etc.audio_level -= 0.01
             etc.audio_level = max(etc.audio_level, 0.0)
-        if key[pygame.K_q]:
-            exit()
-        if key[pygame.K_s]:
-            pygame.image.save(etc.screen, f"{mode_name}-screenshot.jpg")
+
         if key[pygame.K_r]:
-            pygame.image.save(etc.screen, os.path.join(img_dir, '%05d.jpg' % counter))
+            pygame.image.save(etc.screen, os.path.join(etc.mode_root, '%05d.jpg' % counter))
             counter += 1
         elif counter != 0:
-            images_to_gif(img_dir, f"{mode_name}-screencast.gif")
+            images_to_gif(etc.mode_root, f"{etc.modes[etc.mode_index].name}-screencast.gif")
             counter = 0
 
         for event in pygame.event.get():
@@ -135,12 +124,16 @@ def main():
                     etc.toggle("levels")
                 if event.key == pygame.K_SPACE:
                     etc.toggle("audio_trig")
+                if event.key == pygame.K_q:
+                    exit()
+                if event.key == pygame.K_s:
+                    pygame.image.save(etc.screen, f"{etc.modes[etc.mode_index].name}-screenshot.jpg")
         pygame.display.flip()
 
         if recording and counter < n_frames:
-            pygame.image.save(etc.screen, os.path.join(img_dir, '%05d.jpg' % counter))
+            pygame.image.save(etc.screen, os.path.join(etc.mode_root, '%05d.jpg' % counter))
             counter += 1
         elif recording and counter == n_frames:
             if args.gif:
-                images_to_gif(img_dir, args.gif)
+                images_to_gif(etc.mode_root, args.gif)
             exit()

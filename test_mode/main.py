@@ -8,7 +8,6 @@ Knob 3: Circle fade
 Knob 4: Circle color
 Knob 5: Background color
 """
-import os
 import pygame
 import random
 
