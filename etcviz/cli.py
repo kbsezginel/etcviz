@@ -4,7 +4,6 @@ ETC command line interface.
 import os
 import pygame
 import argparse
-import importlib
 from .etc import ETC
 from .tools import images_to_gif
 

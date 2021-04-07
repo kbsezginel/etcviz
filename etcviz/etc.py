@@ -32,8 +32,7 @@ class ETC:
         self.midi_note_new = False
         self.resolution = resolution
         self.screen = pygame.display.set_mode(self.resolution)
-        self.help = True
-        self.levels = True
+        self.help, self.levels = True, True
         self.wd = "etctmp"
         self.saved_scenes = []
         if scenes is not None:
@@ -153,12 +152,12 @@ class ETC:
             text_color = (200, 200, 200)
             font_name = pygame.font.match_font('couriernew')
             title_font = pygame.font.Font(font_name, 24)
-            title_text = title_font.render("Levels", True, text_color)
+            title_text = title_font.render("Levels (l)", True, text_color)
             self.screen.blit(title_text, (xpos, ypos))
             font = pygame.font.Font(font_name, 20)
             levels = ["audio_level", "knob1", "knob2", "knob3", "knob4", "knob5"]
             for idx, l in enumerate(levels, start=1):
-                text = font.render(f"{l}: {round(getattr(self, l), 2)}", True, text_color)
+                text = font.render(f"{idx - 1} {l}: {round(getattr(self, l), 2)}", True, text_color)
                 self.screen.blit(text, (xpos, ypos + 5 + idx * 20))
 
     def display_help(self):
@@ -168,17 +167,21 @@ class ETC:
         text_color = (200, 200, 200)
         xpos, ypos = 10, 10
         font_name = pygame.font.match_font('couriernew')
-        instructions = ["s: save screenshot",
+        instructions = ["space: toggle audio",
+                        "left/right arrow: switch mode",
+                        "1 - 5 + up/down arrow: change knob 1 - 5",
+                        "s: save screenshot",
                         "r: record gif (press + hold)",
                         "a: save scene",
                         "w: write saved scenes",
-                        "left/right arrow: switch mode",
-                        "1 - 5 + up/down arrow: change knob 1 - 5",
                         "h: display usage info",
                         "l: display level info"]
         if self.help:
             title_font = pygame.font.Font(font_name, 24)
-            title_text = title_font.render("Usage", True, text_color)
+            title_text = title_font.render(self.modes[self.mode_index].name, True, text_color)
+            self.screen.blit(title_text, (xpos, ypos))
+            ypos += 25
+            title_text = title_font.render("Help (h)", True, text_color)
             self.screen.blit(title_text, (xpos, ypos))
             font = pygame.font.Font(font_name, 20)
             for idx, i in enumerate(instructions, start=1):
